@@ -1,0 +1,34 @@
+cmake_minimum_required(VERSION 3.20)
+project(GameOfLifeCUDA LANGUAGES CXX CUDA)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# CUDA settings
+set(CMAKE_CUDA_STANDARD 17)
+set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+
+# Enable separable compilation for multiple .cu files
+set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
+
+add_executable(gol
+    src/main.cu
+    src/cpu_life.cpp
+    src/gpu_life_naive.cu
+    src/gpu_life_tiled.cu
+    src/benchmark.cpp
+    src/verify.cpp
+)
+
+target_include_directories(gol PRIVATE include)
+
+# Reasonable defaults; you can tune architectures as needed:
+# set_property(TARGET gol PROPERTY CUDA_ARCHITECTURES 75 80 86 89)
+
+# Optimize
+if (MSVC)
+  target_compile_options(gol PRIVATE /O2)
+else()
+  target_compile_options(gol PRIVATE -O3)
+  target_compile_options(gol PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
+endif()
